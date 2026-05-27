@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bunk Radar | Neon Elite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050108;
+            --card-bg: rgba(15, 5, 20, 0.85);
+            --accent: #ff007f; 
+            --accent-2: #bc13fe; 
+            --text: #ffffff;
+            --text-dim: #94a3b8;
+            --success: #00ffcc; 
+            --warning: #f9d423;
+            --danger: #ff0055;
+            --border-glow: rgba(255, 0, 127, 0.15);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            background-attachment: fixed;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 0, 127, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(188, 19, 254, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #0a0110 0%, #000 100%);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--border-glow);
+            padding: clamp(2rem, 8vw, 3.5rem) clamp(1.5rem, 5vw, 2.5rem);
+            border-radius: 40px;
+            width: 100%;
+            max-width: 450px; 
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            animation: appEntry 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes appEntry {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 200%; height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent));
+            animation: borderFlow 4s linear infinite;
+        }
+
+        @keyframes borderFlow {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            font-weight: 800;
+            text-align: center;
+            margin: 0 0 3rem 0;
+            letter-spacing: 4px;
+            background: linear-gradient(to bottom, #fff 20%, var(--accent) 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 12px rgba(255, 0, 127, 0.4));
+        }
+
+        .input-group { margin-bottom: 2rem; }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        input {
+            width: 100%;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            opacity: 1;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.15);
+        }
+
+        button {
+            width: 100%;
+            padding: 22px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 0, 127, 0.3);
+            transition: 0.3s;
+        }
+
+        button:active { transform: scale(0.97); opacity: 0.9; }
+
+        #result-area {
+            margin-top: 4rem;
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        #pd { font-size: 1.8rem; font-weight: 800; }
+
+        .gauge-container {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            overflow: hidden;
+        }
+
+        #gauge-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 20px;
+            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1.8rem 1rem;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .stat-value { font-size: 2.2rem; font-weight: 800; }
+
+        .color-safe { color: var(--success); text-shadow: 0 0 10px var(--success); }
+        .color-warning { color: var(--warning); text-shadow: 0 0 10px var(--warning); }
+        .color-critical { color: var(--danger); text-shadow: 0 0 10px var(--danger); }
+
+        /* REFINED MINI FOOTER WITH LAUNCH ANIMATION */
+        .footer-minimal {
+            margin-top: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+            opacity: 0; /* Starts hidden for animation */
+            transition: 0.3s;
+            position: relative;
+            padding: 8px 15px;
+            animation: footerLaunch 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+        }
+
+        @keyframes footerLaunch {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 0.8; transform: translateY(0); }
+        }
+
+        .footer-minimal::after {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            top: 50%; left: 50%;
+            width: 100px; height: 45px;
+            background: radial-gradient(circle, rgba(255, 0, 127, 0.25) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            animation: acidicPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes acidicPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            50% { transform: translate(-50%, -50%) scale(1.4); opacity: 0.6; }
+        }
+
+        .creator-tag {
+            font-size: 0.55rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px var(--accent);
+        }
+
+        .insta-neon {
+            width: 13px; /* Slightly smaller icon */
+            height: 13px;
+            fill: var(--accent);
+            filter: drop-shadow(0 0 3px var(--accent));
+        }
+
+        .footer-minimal:active { transform: scale(0.95); opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Bunk Radar</h1>
+    
+    <div class="input-group">
+        <label>Current Attendance %</label>
+        <input type="number" id="p" placeholder="e.g. 85.5" inputmode="decimal">
+    </div>
+
+    <div class="input-group">
+        <label>Total Classes Held</label>
+        <input type="number" id="t" placeholder="e.g. 40" inputmode="numeric">
+    </div>
+
+    <button onclick="calc()">Initiate Scan</button>
+
+    <div id="result-area">
+        <div class="status-header">
+            <span id="st" style="font-weight:800; letter-spacing:2px;">STATUS</span>
+            <span id="pd">0%</span>
+        </div>
+        <div class="gauge-container">
+            <div id="gauge-bar"></div>
+        </div>
+        
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-label">SAFE LEAVES</div>
+                <div id="lv" class="stat-value">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">REQUIRED</div>
+                <div id="at" class="stat-value">0</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="https://www.instagram.com/the_karthiiiii?igsh=MWszMjFhOTNtdnp3bQ==" target="_blank" class="footer-minimal">
+    <span class="creator-tag">Creator</span>
+    <svg class="insta-neon" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+</a>
+
+<script>
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function calc() {
+        let currentP = parseFloat(document.getElementById('p').value);
+        let T = parseInt(document.getElementById('t').value);
+        
+        if(isNaN(currentP) || isNaN(T) || T <= 0) return;
+        currentP = Math.min(100, Math.max(0, currentP));
+
+        document.getElementById('result-area').style.display = 'block';
+        const A = (currentP / 100) * T;
+        
+        const bar = document.getElementById('gauge-bar');
+        const st = document.getElementById('st');
+        const pd = document.getElementById('pd');
+        const lvBox = document.getElementById('lv');
+        const atBox = document.getElementById('at');
+        
+        st.className = ''; 
+        if(currentP >= 80) { st.innerText = "EXCELLENT"; st.classList.add('color-safe'); }
+        else if(currentP >= 75) { st.innerText = "STABLE"; st.classList.add('color-warning'); }
+        else { st.innerText = "CRITICAL"; st.classList.add('color-critical'); }
+
+        let finalLeaves = 0, finalRequired = 0;
+
+        if(currentP >= 75) {
+            finalLeaves = Math.floor((A / 0.75) - T);
+            finalRequired = 0;
+            lvBox.className = 'stat-value color-safe';
+            atBox.className = 'stat-value';
+        } else {
+            finalRequired = Math.ceil(((0.75 * T) - A) / 0.25);
+            finalLeaves = 0;
+            lvBox.className = 'stat-value';
+            atBox.className = 'stat-value color-critical';
+        }
+
+        setTimeout(() => {
+            bar.style.width = currentP + '%';
+            pd.innerText = Math.round(currentP) + '%';
+            animateValue(lvBox, 0, Math.max(0, finalLeaves), 800);
+            animateValue(atBox, 0, Math.max(0, finalRequired), 800);
+        }, 50);
+    }
+</script>
+
+</body>
+</html>
